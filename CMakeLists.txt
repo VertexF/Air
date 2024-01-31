@@ -57,34 +57,36 @@ target_include_directories(Air PUBLIC  ${VULKAN_INCLUDE_DIR}
                                        ${ENGINE_INCLUDE})
 
 set(AIR_FOUNDATION_SOURCE EngineSrc/Foundation/Array.h
+                          EngineSrc/Foundation/Array.cpp
                           EngineSrc/Foundation/Assert.cpp
                           EngineSrc/Foundation/Assert.h
-                          # EngineSrc/Foundation/Bit.cpp
-                          # EngineSrc/Foundation/Bit.h
+                          EngineSrc/Foundation/Bit.cpp
+                          EngineSrc/Foundation/Bit.h
                           # EngineSrc/Foundation/BlobSerialization.cpp
                           # EngineSrc/Foundation/BlobSerialization.h
                           # EngineSrc/Foundation/Blob.h
                           # EngineSrc/Foundation/Camera.cpp
                           # EngineSrc/Foundation/Camera.h
-                          # EngineSrc/Foundation/Color.cpp
-                          # EngineSrc/Foundation/Color.h
+                          EngineSrc/Foundation/Colour.cpp
+                          EngineSrc/Foundation/Colour.h
                           # EngineSrc/Foundation/DataStructures.cpp
                           # EngineSrc/Foundation/DataStructures.h
                           # EngineSrc/Foundation/File.cpp
                           # EngineSrc/Foundation/File.h
                           # EngineSrc/Foundation/Gltf.cpp
                           # EngineSrc/Foundation/Gltf.h
-                          # EngineSrc/Foundation/HashMap.h
-                          # EngineSrc/Foundation/Log.cpp
-                          # EngineSrc/Foundation/Log.h
-                          # EngineSrc/Foundation/MemoryUtils.h
-                          # EngineSrc/Foundation/Memory.cpp
-                          # EngineSrc/Foundation/Memory.h
-                          # EngineSrc/Foundation/Numerics.cpp
-                          # EngineSrc/Foundation/Numerics.h
+                          EngineSrc/Foundation/HashMap.h
+                          EngineSrc/Foundation/HashMap.cpp
+                          EngineSrc/Foundation/Log.cpp
+                          EngineSrc/Foundation/Log.h
+                          EngineSrc/Foundation/MemoryUtils.h
+                          EngineSrc/Foundation/Memory.cpp
+                          EngineSrc/Foundation/Memory.h
+                          EngineSrc/Foundation/Numerics.cpp
+                          EngineSrc/Foundation/Numerics.h
                           EngineSrc/Foundation/Platform.h
-                          # EngineSrc/Foundation/Process.cpp
-                          # EngineSrc/Foundation/Process.h
+                          EngineSrc/Foundation/Process.cpp
+                          EngineSrc/Foundation/Process.h
                           # EngineSrc/Foundation/RelativeDataStructures.h
                           # EngineSrc/Foundation/ResourceManager.cpp
                           # EngineSrc/Foundation/ResourceManager.h
@@ -92,12 +94,11 @@ set(AIR_FOUNDATION_SOURCE EngineSrc/Foundation/Array.h
                           # EngineSrc/Foundation/Serialization.h
                           # EngineSrc/Foundation/ServiceManager.cpp
                           # EngineSrc/Foundation/ServiceManager.h
-                          # EngineSrc/Foundation/Service.cpp
-                          # EngineSrc/Foundation/Service.h
-                          # EngineSrc/Foundation/String.cpp
-                          # EngineSrc/Foundation/String.h
-                          # EngineSrc/Foundation/Time.cpp
-                          # EngineSrc/Foundation/Time.h
+                          EngineSrc/Foundation/Service.h
+                          EngineSrc/Foundation/String.cpp
+                          EngineSrc/Foundation/String.h
+                          EngineSrc/Foundation/Time.cpp
+                          EngineSrc/Foundation/Time.h
 )
 add_library(AirFoundation STATIC ${AIR_FOUNDATION_SOURCE})
 
@@ -112,7 +113,8 @@ target_compile_definitions(AirFoundation PRIVATE
 )
 
 target_include_directories(AirFoundation PRIVATE
-                           EngineSrc
+                           ${CMAKE_CURRENT_SOURCE_DIR}
+                           ${CMAKE_CURRENT_SOURCE_DIR}/EngineSrc
 )
 
 set(AIR_APPLICATION_SOURCE EngineSrc/Application/Application.cpp
@@ -142,7 +144,8 @@ target_compile_definitions(AirApplication PRIVATE
 )
 
 target_include_directories(AirApplication PRIVATE
-                           EngineSrc
+                           ${CMAKE_CURRENT_SOURCE_DIR}
+                           ${CMAKE_CURRENT_SOURCE_DIR}/EngineSrc
 )
 
 if (WIN32)

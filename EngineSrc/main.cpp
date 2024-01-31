@@ -1,4 +1,4 @@
-#include <iostream>
+#include "Foundation/Log.h"
 
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
@@ -13,7 +13,8 @@ int main()
     appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_3;
 
-    std::cout << "Hello new engine." << std::endl;
+    aprintret("Hello new engine");
+    aprintret("How many engines have we made %d", 1);
 
     return 0;
 }
