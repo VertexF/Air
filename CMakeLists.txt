@@ -69,8 +69,8 @@ set(AIR_FOUNDATION_SOURCE EngineSrc/Foundation/Array.h
                           # EngineSrc/Foundation/Camera.h
                           EngineSrc/Foundation/Colour.cpp
                           EngineSrc/Foundation/Colour.h
-                          # EngineSrc/Foundation/DataStructures.cpp
-                          # EngineSrc/Foundation/DataStructures.h
+                          EngineSrc/Foundation/DataStructures.cpp
+                          EngineSrc/Foundation/DataStructures.h
                           # EngineSrc/Foundation/File.cpp
                           # EngineSrc/Foundation/File.h
                           # EngineSrc/Foundation/Gltf.cpp
