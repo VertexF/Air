@@ -22,7 +22,7 @@ namespace Air
     //Static buffer to log the error coming from windows.
     static const uint32_t PROCESS_LOG_BUFFER_SIZE = 256;
     char PROCESS_LOG_BUFFER[PROCESS_LOG_BUFFER_SIZE];
-    static char PROCESS_OUTPUT_BUFFER;
+    static char PROCESS_OUTPUT_BUFFER[1025];
 
 #if defined(_WIN32)
     void win32GetError(char* buffer, uint32_t size) 
@@ -94,19 +94,19 @@ namespace Air
 
         //Output
         DWORD bytesRead;
-        ok = ReadFile(handleStdoutPipeRead, PROCESS_LOG_BUFFER, 1024, &bytesRead, nullptr);
+        ok = ReadFile(handleStdoutPipeRead, PROCESS_OUTPUT_BUFFER, 1024, &bytesRead, nullptr);
 
         //Consume all output
         //Terinate current read initalise the next.
         while (ok == true) 
         {
-            PROCESS_LOG_BUFFER[bytesRead] = 0;
-            aprint("%s", PROCESS_LOG_BUFFER);
+            PROCESS_OUTPUT_BUFFER[bytesRead] = 0;
+            aprint("%s", PROCESS_OUTPUT_BUFFER);
 
-            ok = ReadFile(handleStdoutPipeRead, PROCESS_LOG_BUFFER, 1024, &bytesRead, nullptr);
+            ok = ReadFile(handleStdoutPipeRead, PROCESS_OUTPUT_BUFFER, 1024, &bytesRead, nullptr);
         }
 
-        if (strlen(searchError) > 0 && strstr(PROCESS_LOG_BUFFER, searchError))
+        if (strlen(searchError) > 0 && strstr(PROCESS_OUTPUT_BUFFER, searchError))
         {
             executeSuccess = false;
         }
@@ -124,19 +124,87 @@ namespace Air
 
     const char* processGetOutput() 
     {
-        return PROCESS_LOG_BUFFER;
+        return PROCESS_OUTPUT_BUFFER;
     }
 
 #else
+
+    bool processExcute(const char* workingDirectory, const char* processFullPath, const char* arguments, const char* searchError)
+    {
+        char currentDir[4096];
+        getcwd(currentDir, 4096);
+
+        int result = chdir(workingDirectory);
+        AIR_ASSERT(result == 0);
+
+        Allocator* allocator = &MemoryService::instance()->system_allocator;
+
+        size_t fullCMDSize = strlen(processFullPath) + 1 + strlen(arguments) + 1;
+        StringBuffer fullCMDBuffer;
+        fullCMDBuffer.init(fullCMDSize, allocator);
+
+        char* fullCMD = fullCMDBuffer.append_use_f("%s %s", processFullPath, arguments);
+
+        //TODO(marco): this works only if one process is started at a time.
+        FILE* cmdStream = popen(fullCMD, "r");
+        bool executeSuccess = false;
+        if (cmdStream != nullptr) 
+        {
+            result = wait(nullptr);
+
+            size_t readChunkSize = 1024;
+            if (result != -1) 
+            {
+                size_t byteRead = fread(PROCESS_OUTPUT_BUFFER, 1, readChunkSize, cmdStream);
+                while (byteRead == readChunkSize) 
+                {
+                    PROCESS_OUTPUT_BUFFER[byteRead] = 0;
+                    aprint("%s", PROCESS_OUTPUT_BUFFER);
+
+                    byteRead = fread(PROCESS_OUTPUT_BUFFER, 1, readChunkSize, cmdStream);
+                }
+
+                PROCESS_OUTPUT_BUFFER[byteRead] = 0;
+                aprint("%s", PROCESS_OUTPUT_BUFFER);
+
+                if (strlen(searchError) > 0 && strstr(PROCCESS_OUTPUT_BUFFER, searchError))
+                {
+                    executeSuccess = false;
+                }
+
+                aprint("\n");
+            }
+            else 
+            {
+                int error = errno;
+
+                aprint("Execute process error.\n Exe: \"%s\" - Args: \"%s\" - Working Dir: \"%s\"\n", processFullPath, arguments, workingDirectory);
+                aprint("Error: %d\n", error);
+
+                executeSuccess = false;
+            }
+
+            pclose(cmdStream);
+        }
+        else 
+        {
+            int error = errno;
+
+            aprint("Execute process error.\n Exe: \"%s\" - Args: \"%s\" - Working Dir: \"%s\"\n", processFullPath, arguments, workingDirectory);
+            aprint("Error: %d\n", error);
+
+            executeSuccess = false;
+        }
+
+        chdir(currentDir);
+        fullCMDBuffer.shutdown();
+        return executeSuccess;
+    }
+
+    const char* processGetOutput()
+    {
+        return PROCESS_OUTPUT_BUFFER;
+    }
+
 #endif
-
-    bool processExcute(const char* workingDirectory, const char* processFullPath, const char* arguments, const char* searchError) 
-    {
-        return false;
-    }
-
-    const char* processGetOutput() 
-    {
-        return nullptr;
-    }
 }
