@@ -87,7 +87,8 @@ set(AIR_FOUNDATION_SOURCE EngineSrc/Foundation/Array.h
                           EngineSrc/Foundation/Platform.h
                           EngineSrc/Foundation/Process.cpp
                           EngineSrc/Foundation/Process.h
-                          # EngineSrc/Foundation/RelativeDataStructures.h
+                          EngineSrc/Foundation/RelativeDataStructures.h
+                          EngineSrc/Foundation/RelativeDataStructures.cpp
                           # EngineSrc/Foundation/ResourceManager.cpp
                           # EngineSrc/Foundation/ResourceManager.h
                           # EngineSrc/Foundation/Serialization.cpp
@@ -99,6 +100,7 @@ set(AIR_FOUNDATION_SOURCE EngineSrc/Foundation/Array.h
                           EngineSrc/Foundation/String.h
                           EngineSrc/Foundation/Time.cpp
                           EngineSrc/Foundation/Time.h
+                          EngineSrc/Foundation/WindowsDeclarations.h
 )
 add_library(AirFoundation STATIC ${AIR_FOUNDATION_SOURCE})
 
