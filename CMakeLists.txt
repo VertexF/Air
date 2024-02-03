@@ -58,13 +58,12 @@ target_include_directories(Air PUBLIC  ${VULKAN_INCLUDE_DIR}
 
 set(AIR_FOUNDATION_SOURCE EngineSrc/Foundation/Array.h
                           EngineSrc/Foundation/Array.cpp
-                          EngineSrc/Foundation/Assert.cpp
                           EngineSrc/Foundation/Assert.h
                           EngineSrc/Foundation/Bit.cpp
                           EngineSrc/Foundation/Bit.h
-                          # EngineSrc/Foundation/BlobSerialization.cpp
-                          # EngineSrc/Foundation/BlobSerialization.h
-                          # EngineSrc/Foundation/Blob.h
+                          EngineSrc/Foundation/BlobSerialisation.cpp
+                          EngineSrc/Foundation/BlobSerialisation.h
+                          EngineSrc/Foundation/Blob.h
                           # EngineSrc/Foundation/Camera.cpp
                           # EngineSrc/Foundation/Camera.h
                           EngineSrc/Foundation/Colour.cpp

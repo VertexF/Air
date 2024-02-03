@@ -3,6 +3,9 @@
 
 #include "Platform.h"
 
+//These just set and get data in memory and offset the correct amount depending on the type used in the 
+// template so we get the correct address for the type.
+
 //This is used in the code to write blueprints, like data compilers
 #define AIR_BLOB_WRITE
 
