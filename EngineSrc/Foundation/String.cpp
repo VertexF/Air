@@ -48,9 +48,9 @@ namespace Air
 
     void StringBuffer::init(size_t size, Allocator* allocator) 
     {
-        if (_data) 
+        if (data) 
         {
-            _allocator->deallocate(_data);
+            allocator->deallocate(data);
         }
 
         if (size < 1) 
@@ -59,18 +59,18 @@ namespace Air
             return;
         }
 
-        _allocator = allocator;
-        _data = (char*)air_alloca(size + 1, allocator);
-        AIR_ASSERT(_data != nullptr);
-        _data[0] = 0;
-        _bufferSize = static_cast<uint32_t>(size);
-        _currentSize = 0;
+        allocator = allocator;
+        data = (char*)air_alloca(size + 1, allocator);
+        AIR_ASSERT(data != nullptr);
+        data[0] = 0;
+        bufferSize = static_cast<uint32_t>(size);
+        currentSize = 0;
     }
 
     void StringBuffer::shutdown()
     {
-        air_free(_data, _allocator);
-        _bufferSize = _currentSize = 0;
+        air_free(data, allocator);
+        bufferSize = currentSize = 0;
     }
 
     void StringBuffer::append(const char* string)
@@ -80,57 +80,57 @@ namespace Air
 
     void StringBuffer::append(const StringView& text)
     {
-        const size_t maxLength = _currentSize + text.length < _bufferSize ? text.length : _bufferSize - _currentSize;
-        if (maxLength == 0 || maxLength >= _bufferSize) 
+        const size_t maxLength = currentSize + text.length < bufferSize ? text.length : bufferSize - currentSize;
+        if (maxLength == 0 || maxLength >= bufferSize) 
         {
             AIR_ASSERT_OVERFLOW();
             aprint("Buffer full. Please allocate more size.\n");
             return;
         }
 
-        memoryCopy(&_data[_currentSize], text.text, maxLength);
-        _currentSize += static_cast<uint32_t>(maxLength);
+        memoryCopy(&data[currentSize], text.text, maxLength);
+        currentSize += static_cast<uint32_t>(maxLength);
 
         //Add null termination for string. By allocating one extra character for the null termination this is safe to do.
-        _data[_currentSize] = 0;
+        data[currentSize] = 0;
     }
 
     //Memory version of the append.
     void StringBuffer::appendM(void* memory, size_t size)
     {
-        if (_currentSize + size >= _bufferSize) 
+        if (currentSize + size >= bufferSize) 
         {
             AIR_ASSERT_OVERFLOW();
             aprint("Buffer full. Please allocate more size.\n");
             return;
         }
 
-        memoryCopy(&_data[_currentSize], memory, size);
-        _currentSize += static_cast<uint32_t>(size);
+        memoryCopy(&data[currentSize], memory, size);
+        currentSize += static_cast<uint32_t>(size);
     }
 
     void StringBuffer::append(const StringBuffer& otherBuffer)
     {
-        if (otherBuffer._currentSize == 0) 
+        if (otherBuffer.currentSize == 0) 
         {
             return;
         }
 
-        if (_currentSize + otherBuffer._currentSize >= _bufferSize) 
+        if (currentSize + otherBuffer.currentSize >= bufferSize) 
         {
             AIR_ASSERT_OVERFLOW();
             aprint("Buffer full. Please allocate more size.\n");
             return;
         }
 
-        memoryCopy(&_data[_currentSize], otherBuffer._data, otherBuffer._currentSize);
-        _currentSize += otherBuffer._currentSize;
+        memoryCopy(&data[currentSize], otherBuffer.data, otherBuffer.currentSize);
+        currentSize += otherBuffer.currentSize;
     }
 
     //Formatted version of append.
     void StringBuffer::appendF(const char* format, ...)
     {
-        if (_currentSize >= _bufferSize) 
+        if (currentSize >= bufferSize) 
         {
             AIR_ASSERT_OVERFLOW();
             aprint("Buffer full. Please allocate more size.\n");
@@ -141,11 +141,11 @@ namespace Air
         va_list args;
         va_start(args, format);
 #if defined(_MSC_VER)
-        int writtenChars = vsnprintf_s(&_data[_currentSize], _bufferSize - _currentSize, _TRUNCATE, format, args);
+        int writtenChars = vsnprintf_s(&data[currentSize], bufferSize - currentSize, _TRUNCATE, format, args);
 #else
-        int writtenChars = vsnprintf_s(&_data[_currentSize], _bufferSize - _currentSize, format, args);
+        int writtenChars = vsnprintf_s(&data[currentSize], bufferSize - currentSize, format, args);
 #endif
-        _currentSize += writtenChars > 0 ? writtenChars : 0;
+        currentSize += writtenChars > 0 ? writtenChars : 0;
         va_end(args);
 
         if (writtenChars < 0) 
@@ -162,11 +162,11 @@ namespace Air
 
     char* StringBuffer::appendUseF(const char* format, ...)
     {
-        uint32_t cachedOffset = _currentSize;
+        uint32_t cachedOffset = currentSize;
 
         //Maybe come back to this and fix up the formating, this isn't safe.
         //I'm not sure if this is needed because if you crash the string buffer, that might be a you problem.
-        if (_currentSize >= _bufferSize) 
+        if (currentSize >= bufferSize) 
         {
             AIR_ASSERT_OVERFLOW();
             aprint("Buffer full. Please allocate more size.\n");
@@ -176,11 +176,11 @@ namespace Air
         va_list args;
         va_start(args, format);
 #if defined(_MSC_VER)
-        int writtenChars = vsnprintf_s(&_data[_currentSize], _bufferSize - _currentSize, _TRUNCATE, format, args);
+        int writtenChars = vsnprintf_s(&data[currentSize], bufferSize - currentSize, _TRUNCATE, format, args);
 #else
-        int writtenChars = vsnprintf_s(&_data[_currentSize], _bufferSize - _currentSize, format, args);
+        int writtenChars = vsnprintf_s(&data[currentSize], bufferSize - currentSize, format, args);
 #endif
-        _currentSize += writtenChars > 0 ? writtenChars : 0;
+        currentSize += writtenChars > 0 ? writtenChars : 0;
         va_end(args);
 
         if (writtenChars < 0) 
@@ -188,21 +188,21 @@ namespace Air
             aprint("New string too bif for current. Please allocate more size.\n");
         }
 
-        _data[_currentSize] = 0;
-        ++_currentSize;
+        data[currentSize] = 0;
+        ++currentSize;
 
-        return _data + cachedOffset;
+        return data + cachedOffset;
     }
 
     //Append and returns a point to the start. Used for strings mostly.
     char* StringBuffer::appendUse(const StringView& text)
     {
-        uint32_t cachedOffset = _currentSize;
+        uint32_t cachedOffset = currentSize;
 
         append(text);
-        ++_currentSize;
+        ++currentSize;
 
-        return _data + cachedOffset;
+        return data + cachedOffset;
     }
 
     //Append a substring of the passed string.
@@ -210,66 +210,66 @@ namespace Air
     {
         uint32_t size = endIndex + startIndex;
 
-        if (_currentSize + size >= _bufferSize) 
+        if (currentSize + size >= bufferSize) 
         {
             AIR_ASSERT_OVERFLOW();
             aprint("Buffer full. Please allocate more size.\n");
             return nullptr;
         }
 
-        uint32_t cachedOffset = _currentSize;
+        uint32_t cachedOffset = currentSize;
 
         //memoryCopy() can't be used 
-        memcpy(&_data[_currentSize], string, size);
-        _currentSize += size;
+        memcpy(&data[currentSize], string, size);
+        currentSize += size;
 
-        _data[_currentSize] = 0;
-        ++_currentSize;
+        data[currentSize] = 0;
+        ++currentSize;
 
-        return _data + cachedOffset;
+        return data + cachedOffset;
     }
 
     void StringBuffer::closeCurrentString()
     {
-        _data[_currentSize] = 0;
-        ++_currentSize;
+        data[currentSize] = 0;
+        ++currentSize;
     }
 
     //Indexing stuff.
     uint32_t StringBuffer::getIndex(const char* text) const
     {
-        uint64_t textDistance = text - _data;
+        uint64_t textDistance = text - data;
 
-        return textDistance < _bufferSize ? static_cast<uint32_t>(textDistance) : UINT32_MAX;
+        return textDistance < bufferSize ? static_cast<uint32_t>(textDistance) : UINT32_MAX;
     }
 
     const char* StringBuffer::getText(uint32_t index) const
     {
-        return index < _bufferSize ? static_cast<const char*>(_data + index) : nullptr;
+        return index < bufferSize ? static_cast<const char*>(data + index) : nullptr;
     }
 
     char* StringBuffer::reserve(size_t size)
     {
-        if (_currentSize + size >= _bufferSize) 
+        if (currentSize + size >= bufferSize) 
         {
             return nullptr;
         }
 
-        uint32_t offset = _currentSize;
-        _currentSize += static_cast<uint32_t>(size);
+        uint32_t offset = currentSize;
+        currentSize += static_cast<uint32_t>(size);
 
-        return _data + offset;
+        return data + offset;
     }
 
     char* StringBuffer::current() 
     {
-        return _data + _currentSize;
+        return data + currentSize;
     }
 
     void StringBuffer::clear()
     {
-        _currentSize = 0;
-        _data[0] = 0;
+        currentSize = 0;
+        data[0] = 0;
     }
 
     void StringArray::init(uint32_t size, Allocator* alloc) 

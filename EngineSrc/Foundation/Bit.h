@@ -9,6 +9,9 @@ namespace Air
 {
     struct Allocator;
 
+    static uint32_t bitMask8(uint32_t bit) { return 1 << (bit & 7); };
+    static uint32_t bitSlot8(uint32_t bit) { return bit / 8; }
+
     uint32_t leadingZerosU32(uint32_t x);
 #if defined(_MSC_VER)
     uint32_t loadZerosU32msvc(uint32_t x);
@@ -72,6 +75,11 @@ namespace Air
             return *this;
         }
 
+        BitMask end() const 
+        {
+            return BitMask(0);
+        }
+
         uint32_t trailingZeros() const 
         {
             return trailingZerosU32(_mask);
@@ -114,9 +122,20 @@ namespace Air
     template<uint32_t SizeInBytes>
     struct BitSetFixed 
     {
-        void setBit(uint32_t index);
-        void clearBit(uint32_t index);
-        uint8_t getBit(uint32_t index);
+        void setBit(uint32_t index)
+        {
+            bits[index / 8] |= bitMask8(index);
+        }
+
+        void clearBit(uint32_t index)
+        {
+            bits[index / 8] &= ~bitMask8(index);
+        }
+
+        uint8_t getBit(uint32_t index)
+        {
+            return bits[index / 8] & bitMask8(index);
+        }
 
         uint8_t bits[SizeInBytes];
     };

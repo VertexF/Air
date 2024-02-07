@@ -11,9 +11,6 @@
 
 namespace Air 
 {
-    static uint32_t bitMask8(uint32_t bit) { return 1 << (bit & 7); };
-    static uint32_t bitSlot8(uint32_t bit) { return bit / 8; }
-
     uint32_t leadingZerosU32(uint32_t x)
     {
 #if defined(_MSC_VER)
@@ -134,24 +131,6 @@ namespace Air
     }
 
     uint8_t BitSet::getBit(uint32_t index) 
-    {
-        return bits[index / 8] & bitMask8(index);
-    }
-
-    template<uint32_t SizeInBytes>
-    void BitSetFixed<SizeInBytes>::setBit(uint32_t index)
-    {
-        bits[index / 8] |= bitMask8(index);
-    }
-
-    template<uint32_t SizeInBytes>
-    void BitSetFixed<SizeInBytes>::clearBit(uint32_t index)
-    {
-        bits[index / 8] &= ~bitMask8(index);
-    }
-
-    template<uint32_t SizeInBytes>
-    uint8_t BitSetFixed<SizeInBytes>::getBit(uint32_t index)
     {
         return bits[index / 8] & bitMask8(index);
     }

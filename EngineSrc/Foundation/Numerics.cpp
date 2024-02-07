@@ -8,34 +8,6 @@
 
 namespace Air 
 {
-    template<typename T>
-    T max(const T& a, const T& b) 
-    {
-        return a > b ? a : b;
-    }
-
-    template<typename T>
-    T min(const T& a, const T& b) 
-    {
-        return a < b ? a : b;
-    }
-
-    template<typename T>
-    T clamp(const T& v, const T& a, const T& b) 
-    {
-        return v < a ? a : (v > b ? b : v);
-    }
-
-    template<typename To, typename From>
-    To safeCast(From a) 
-    {
-        To result = (To)a;
-        From check = (From)result;
-
-        AIR_ASSERT(check == result);
-
-        return result;
-    }
 
 #if defined(AIR_MATH_OVERFLOW_CHECK)
     uint32_t ceilU32(float value) 

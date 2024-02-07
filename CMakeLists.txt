@@ -88,8 +88,8 @@ set(AIR_FOUNDATION_SOURCE EngineSrc/Foundation/Array.h
                           EngineSrc/Foundation/Process.h
                           EngineSrc/Foundation/RelativeDataStructures.h
                           EngineSrc/Foundation/RelativeDataStructures.cpp
-                          # EngineSrc/Foundation/ResourceManager.cpp
-                          # EngineSrc/Foundation/ResourceManager.h
+                          EngineSrc/Foundation/ResourceManager.cpp
+                          EngineSrc/Foundation/ResourceManager.h
                           # EngineSrc/Foundation/Serialization.cpp
                           # EngineSrc/Foundation/Serialization.h
                           # EngineSrc/Foundation/ServiceManager.cpp

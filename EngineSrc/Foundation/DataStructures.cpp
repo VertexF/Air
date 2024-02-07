@@ -27,7 +27,7 @@ namespace Air
         usedIndinces = 0;
     }
 
-    void ResourcePool::shutdown() 
+    void ResourcePool::shutdown() const
     {
         if (freeIndiceHead != 0) 
         {
@@ -90,57 +90,5 @@ namespace Air
         }
 
         return nullptr;
-    }
-
-    template<typename T>
-    void ResourcePoolTyped<T>::init(Allocator* alloc, uint32_t poolSize)
-    {
-        ResourcePool::init(alloc, poolSize, sizeof(T));
-    }
-
-    template<typename T>
-    void ResourcePoolTyped<T>::shutdown()
-    {
-        if (freeIndiceHead != 0) 
-        {
-            aprint("Resource pool has unfreed resources.\n");
-
-            for (uint32_t i = 0; i < freeIndiceHead; ++i) 
-            {
-                aprint("\tResource %u, %s\n", freeIndices[i], get(freeIndices[i])->name);
-            }
-        }
-
-        ResourcePool::shutdown();
-    }
-
-    template<typename T>
-    T* ResourcePoolTyped<T>::obtain()
-    {
-        uint32_t resourceIndex = ResourcePool::obtainResource();
-        if (resourceIndex != UINT32_MAX)
-        {
-            T* resource = get(resourceIndex);
-            resource->poolIndex = resourceIndex;
-            return resource;
-        }
-    }
-
-    template<typename T>
-    void ResourcePoolTyped<T>::release(T* resource)
-    {
-        ResourcePool::releaseResource(resource->poolIndex);
-    }
-
-    template<typename T>
-    T* ResourcePoolTyped<T>::get(uint32_t index)
-    {
-        return (T*)ResourcePool::accessResource(index);
-    }
-
-    template<typename T>
-    const T* ResourcePoolTyped<T>::get(uint32_t index) const
-    {
-        return (const T*)ResourcePool::accessResource(index);
     }
 }

@@ -24,9 +24,8 @@ namespace Air
 
     //A class that pre-allocates a buffer and appends string to it.
     //Reserve an additional byte for the null termination when need.
-    class StringBuffer 
+    struct StringBuffer 
     {
-    public:
         void init(size_t size, Allocator* allocator);
         void shutdown();
 
@@ -55,11 +54,11 @@ namespace Air
         char* current();
 
         void clear();
-    private:
-        char* _data = nullptr;
-        uint32_t _bufferSize = 1024;
-        uint32_t _currentSize = 0;
-        Allocator* _allocator = nullptr;
+
+        char* data = nullptr;
+        uint32_t bufferSize = 1024;
+        uint32_t currentSize = 0;
+        Allocator* allocator = nullptr;
     };
 
     struct StringArray 

@@ -1,20 +1,27 @@
-#include "Foundation/Log.h"
+#include "Foundation/Memory.h"
+#include "Foundation/Array.h"
+#include "Foundation/Platform.h"
 
-#include <vulkan/vulkan.h>
-#include <vk_mem_alloc.h>
+#include <iostream>
 
-int main() 
+using namespace Air;
+
+int main()
 {
-    VkApplicationInfo appInfo = {};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Air Engine";
-    appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
-    appInfo.pEngineName = "Air";
-    appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_3;
+    Array<uint32_t> numberArray;
+    HeapAllocator heapAllocator;
+    heapAllocator.init(32 * 1024 * 1024);
+    numberArray.init(&heapAllocator, 5);
+    numberArray.push(1);
+    numberArray.push(2);
+    numberArray.push(3);
+    numberArray.push(4);
+    numberArray.push(5);
 
-    aprintret("Hello new engine");
-    aprintret("How many engines have we made %d", 1);
+    for (uint32_t i = 0; i < numberArray.size; ++i)
+    {
+        std::cout << "Elements are : " << numberArray[i] << std::endl;
+    }
 
     return 0;
 }

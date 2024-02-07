@@ -3,6 +3,10 @@
 
 #include "Platform.h"
 
+#include "Memory.h"
+#include "Assert.h"
+#include "Array.h"
+
 //These just set and get data in memory and offset the correct amount depending on the type used in the 
 // template so we get the correct address for the type.
 
@@ -16,36 +20,89 @@ namespace Air
     template<typename T>
     struct RelativePointer
     {
-        T* get() const;
+        T* get() const
+        {
+            char* address = ((char*)&offset) + offset;
+            return offset != 0 ? (T*)address : nullptr;
+        }
 
-        bool isEqual(const RelativePointer& other) const;
-        bool isNull() const;
-        bool isNotNull() const;
+        bool isEqual(const RelativePointer& other) const
+        {
+            return get() == other.get();
+        }
+
+        bool isNull() const
+        {
+            return offset == 0;
+        }
+
+        bool isNotNull() const
+        {
+            return offset != 0;
+        }
 
         //This hopefully gives us a cleaner interface.
-        T* operator->() const;
-        T& operator*() const;
+        T* operator->() const
+        {
+            return get();
+        }
+
+        T& operator*() const
+        {
+            return *(get());
+        }
 
 #if defined(AIR_BLOB_WRITE)
-        void set(char* rawPointer);
-        void setNull();
-#endif
+        void set(char* rawPointer)
+        {
+            offset = rawPointer ? (int32_t)(rawPointer - (char*)this) : 0;
+        }
 
+        void setNull()
+        {
+            offset = 0;
+        }
+#endif
         int32_t offset = 0;
     };
 
     template <typename T>
     struct RelativeArray 
     {
-        const T& operator[](uint32_t index) const;
-        T& operator[](uint32_t index);
+        const T& operator[](uint32_t index) const
+        {
+            AIR_ASSERT(index < size);
+            return data.get()[index];
+        }
 
-        const T* get() const;
-        T* get();
+        T& operator[](uint32_t index)
+        {
+            AIR_ASSERT(index < size);
+            return data.get()[index];
+        }
+
+        const T* get() const
+        {
+            return data.get();
+        }
+
+        T* get()
+        {
+            return data.get();
+        }
 
 #if defined(AIR_BLOB_WRITE)
-        void set(char* rawPointer, uint32_t size);
-        void setEmpty();
+        void set(char* rawPointer, uint32_t size)
+        {
+            data.set(rawPointer);
+            this->size = size;
+        }
+
+        void setEmpty()
+        {
+            size = 0;
+            data.setNull();
+        }
 #endif
 
         uint32_t size = 0;
