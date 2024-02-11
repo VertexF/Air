@@ -54,8 +54,8 @@ namespace Air
 
         void deallocate(void* pointer);
 
-        void* TLSFHandle;
-        void* memory;
+        void* TLSFHandle  = nullptr;
+        void* memory = nullptr;
         size_t allocatedSize = 0;
         size_t maxSize = 0;
     };

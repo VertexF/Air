@@ -1,27 +1,32 @@
 #include "Foundation/Memory.h"
 #include "Foundation/Array.h"
 #include "Foundation/Platform.h"
+#include "Foundation/Service.h"
+#include "Foundation/ServiceManager.h"
 
 #include <iostream>
 
-using namespace Air;
+namespace Air
+{
+    struct NewService : public Air::Service
+    {
+        static NewService* instance() 
+        {
+            static NewService s_input_service;
+            return &s_input_service;
+        }
 
+        static constexpr const char* NAME = "I am a new Service";
+    };
+}
 int main()
 {
-    Array<uint32_t> numberArray;
-    HeapAllocator heapAllocator;
-    heapAllocator.init(32 * 1024 * 1024);
-    numberArray.init(&heapAllocator, 5);
-    numberArray.push(1);
-    numberArray.push(2);
-    numberArray.push(3);
-    numberArray.push(4);
-    numberArray.push(5);
+    Air::HeapAllocator heap;
+    heap.init(32 * 1024);
 
-    for (uint32_t i = 0; i < numberArray.size; ++i)
-    {
-        std::cout << "Elements are : " << numberArray[i] << std::endl;
-    }
+    Air::ServiceManager* serviceManager = new Air::ServiceManager;
+    serviceManager->init(&heap);
+    auto input = serviceManager->get<Air::NewService>();
 
     return 0;
 }

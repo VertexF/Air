@@ -92,8 +92,8 @@ set(AIR_FOUNDATION_SOURCE EngineSrc/Foundation/Array.h
                           EngineSrc/Foundation/ResourceManager.h
                           # EngineSrc/Foundation/Serialization.cpp
                           # EngineSrc/Foundation/Serialization.h
-                          # EngineSrc/Foundation/ServiceManager.cpp
-                          # EngineSrc/Foundation/ServiceManager.h
+                          EngineSrc/Foundation/ServiceManager.cpp
+                          EngineSrc/Foundation/ServiceManager.h
                           EngineSrc/Foundation/Service.h
                           EngineSrc/Foundation/String.cpp
                           EngineSrc/Foundation/String.h
@@ -115,7 +115,8 @@ target_compile_definitions(AirFoundation PRIVATE
 
 target_include_directories(AirFoundation PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR}
-                           ${CMAKE_CURRENT_SOURCE_DIR}/EngineSrc
+                           ${ENGINE_INCLUDE}
+                           ${VENDOR_INCLUDES}
 )
 
 set(AIR_APPLICATION_SOURCE EngineSrc/Application/Application.cpp

@@ -1,8 +1,8 @@
 #include "File.h"
 
-#include "memory.h"
-#include "assert.h"
-#include "string.h"
+#include "Memory.h"
+#include "Assert.h"
+#include "String.h"
 
 #if defined(_WIN64)
 #include <windows.h>

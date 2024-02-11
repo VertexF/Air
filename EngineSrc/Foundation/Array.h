@@ -172,7 +172,6 @@ namespace Air
     template<typename T>
     struct ArrayView 
     {
-
         ArrayView(T* d, uint32_t size) : data(d), size(size)
         {
         }

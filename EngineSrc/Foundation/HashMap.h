@@ -1,4 +1,4 @@
-#ifndef HASH_MAP_HDR
+﻿#ifndef HASH_MAP_HDR
 #define HASH_MAP_HDR
 
 #include "Memory.h"
@@ -9,17 +9,16 @@
 #include <intrin0.h>
 #endif
 
-#include "vender/wyhash.h"
+#include "wyhash.h"
 
 #if defined(_MSC_VER)
     //  Windows
 #include <Windows.h>
-#define WIN32_LEAN_AND_MEAN
     static bool SSSE3_SUPPORT = IsProcessorFeaturePresent(PF_SSSE3_INSTRUCTIONS_AVAILABLE);
 #else
     //  GCC Intrinsics
 #include <cpuid.h>
-    static void cpuid(int info[4], int InfoType)
+static void cpuid(int info[4], int InfoType)
 {
     __cpuid_count(InfoType, 0, info[0], info[1], info[2], info[3]);
 }
@@ -34,18 +33,18 @@ unsigned nExIds = info[0];
 static bool SSSE3_SUPPORT = (info[2] & ((int)1 << 9)) != 0;
 #endif
 
-namespace Air
+namespace 
 {
     //Control bytes
     //This is following Google's abseil librar convention - based on performance.
-    static const int8_t CONTROL_BITMASK_EMPTY = -128;  //0b10000000;
-    static const int8_t CONTROL_BITMASK_DELETED = -2;  //0b11111110;
-    static const int8_t CONTROL_BITMASK_SENTINEL = -1; //0b11111111;
+    const int8_t CONTROL_BITMASK_EMPTY = -128;  //0b10000000;
+    const int8_t CONTROL_BITMASK_DELETED = -2;  //0b11111110;
+    const int8_t CONTROL_BITMASK_SENTINEL = -1; //0b11111111;
 
-    static bool controlIsEmpty(int8_t control) { return control == CONTROL_BITMASK_EMPTY; }
-    static bool controlIsFull(int8_t control) { return control >= 0; }
-    static bool controlIsDeleted(int8_t control) { return control == CONTROL_BITMASK_DELETED; }
-    static bool controlIsEmptyOrDeleted(int8_t control) { return control < CONTROL_BITMASK_SENTINEL; }
+    bool controlIsEmpty(int8_t control) { return control == CONTROL_BITMASK_EMPTY; }
+    bool controlIsFull(int8_t control) { return control >= 0; }
+    bool controlIsDeleted(int8_t control) { return control == CONTROL_BITMASK_DELETED; }
+    bool controlIsEmptyOrDeleted(int8_t control) { return control < CONTROL_BITMASK_SENTINEL; }
 
     //All this below returns a hash seed
     //This seed consists of the ctrl_pointer, which adds enough entropy to ensure non-determinisim of iterator order in most case.
@@ -53,14 +52,14 @@ namespace Air
     //We shift the pointer to try to use higher entry bits. 
     //A good number seems to be 12 bits, because that aligns with the page size.
 
-    static uint64_t hashSeed(const int8_t* control) { return reinterpret_cast<uintptr_t>(control) >> 12; }
+    uint64_t hashSeed(const int8_t* control) { return reinterpret_cast<uintptr_t>(control) >> 12; }
 
-    static uint64_t hash1(uint64_t hash, const int8_t* control) { return (hash >> 7) ^ hashSeed(control); }
-    static int8_t hash2(uint64_t hash) { return hash & 0x7F; }
+    uint64_t hash1(uint64_t hash, const int8_t* control) { return (hash >> 7) ^ hashSeed(control); }
+    int8_t hash2(uint64_t hash) { return hash & 0x7F; }
 
-    static bool capacityIsValid(size_t n) { return ((n + 1) & n) == 0 && n > 0; }
+    bool capacityIsValid(size_t n) { return ((n + 1) & n) == 0 && n > 0; }
 
-    static uint64_t lzcntSoft(uint64_t n)
+    uint64_t lzcntSoft(uint64_t n)
     {
         //Note(macro): __lzcnt intrisics require at least aswell.
 #if defined(_MSC_VER)
@@ -74,8 +73,62 @@ namespace Air
     }
 
     //Rounds up the apacity to the next power of 2 minus 1 with a minimum of 1.
-    static uint64_t capacityNormalise(uint64_t n) { return n ? ~uint64_t{} >> lzcntSoft(n) : 1; }
+    uint64_t capacityNormalise(uint64_t n) { return n ? ~uint64_t{} >> lzcntSoft(n) : 1; }
 
+    //General notes of capacity/growth methods below:
+    //We use 7/8th as a maximum load factor. For 16-wide groups, that gives an average of two empty slots per group.
+    //For (capacity + 1) >= Group::WIDTH, growth 7/8 * capacity.
+    //For (capacity + 1) <  Group::WIFTH, growth == capacity. - In this case, we never need to probe (the whole table fits in one group)
+    //so we don't need a load factor less than 1
+
+    //Give 'capacity' of the table, returns the size (i.e. number of full slots) at which we should grow the capacity.
+    //if (Group::WIDTH == 8 && capacity == 7) { return 6; }
+    //x - x / 8 does not work when x == 7
+    uint64_t capacityToGrowth(uint64_t capacity) { return capacity - capacity / 8; }
+    uint64_t capacityGrowthToLowerBound(uint64_t growth) { return growth + static_cast<uint64_t>((static_cast<int64_t>(growth) - 1) / 7); }
+
+    int8_t* groupInitEmpty()
+    {
+        alignas(16) static constexpr int8_t emptyGroup[] =
+        {
+            CONTROL_BITMASK_SENTINEL,
+            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY,
+            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY,
+            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY,
+            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY,
+            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY
+        };
+
+        return const_cast<int8_t*>(emptyGroup);
+    }
+
+    template<typename T>
+    uint64_t hashCalculate(const T& value, size_t seed = 0)
+    {
+        return wyhash(&value, sizeof(T), seed, _wyp);
+    }
+
+    template<size_t N>
+    uint64_t hashCalculate(const char(&value)[N], size_t seed = 0)
+    {
+        return wyhash(value, strlen(value), seed, _wyp);
+    }
+
+    uint64_t hashCalculate(const char*& value, size_t seed)
+    {
+        return wyhash(value, strlen(value), seed, _wyp);
+    }
+
+    uint64_t hashBytes(void* data, size_t lenght, size_t seed = 0)
+    {
+        return wyhash(data, lenght, seed, _wyp);
+    }
+
+    const uint64_t ITERATOR_END = UINT64_MAX;
+}//TED
+
+namespace Air
+{
     struct GroupSse2Impl
     {
         static constexpr size_t WIDTH = 16;
@@ -114,18 +167,6 @@ namespace Air
         __m128i control;
     };
 
-    //General notes of capacity/growth methods below:
-    //We use 7/8th as a maximum load factor. For 16-wide groups, that gives an average of two empty slots per group.
-    //For (capacity + 1) >= Group::WIDTH, growth 7/8 * capacity.
-    //For (capacity + 1) <  Group::WIFTH, growth == capacity. - In this case, we never need to probe (the whole table fits in one group)
-    //so we don't need a load factor less than 1
-
-    //Give 'capacity' of the table, returns the size (i.e. number of full slots) at which we should grow the capacity.
-    //if (Group::WIDTH == 8 && capacity == 7) { return 6; }
-    //x - x / 8 does not work when x == 7
-    static uint64_t capacityToGrowth(uint64_t capacity) { return capacity - capacity / 8; }
-    static uint64_t capacityGrowthToLowerBound(uint64_t growth) { return growth + static_cast<uint64_t>((static_cast<int64_t>(growth) - 1) / 7); }
-
     static void convertDeletedToEmptyAndFullToDeleted(int8_t* control, size_t capacity)
     {
         for (int8_t* pos = control; pos != control + capacity + 1; pos += GroupSse2Impl::WIDTH)
@@ -136,45 +177,6 @@ namespace Air
         memoryCopy(control + capacity + 1, control, GroupSse2Impl::WIDTH);
         control[capacity] = CONTROL_BITMASK_SENTINEL;
     }
-
-    static int8_t* groupInitEmpty()
-    {
-        alignas(16) static constexpr int8_t emptyGroup[] =
-        {
-            CONTROL_BITMASK_SENTINEL,
-            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY,
-            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY,
-            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY,
-            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY,
-            CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY, CONTROL_BITMASK_EMPTY
-        };
-
-        return const_cast<int8_t*>(emptyGroup);
-    }
-
-    template<typename T>
-    static uint64_t hashCalculate(const T& value, size_t seed = 0)
-    {
-        return wyhash(&value, sizeof(T), seed, _wyp);
-    }
-
-    template<size_t N>
-    static uint64_t hashCalculate(const char(&value)[N], size_t seed = 0)
-    {
-        return wyhash(value, strlen(value), seed, _wyp);
-    }
-
-    static uint64_t hashCalculate(const char*& value, size_t seed)
-    {
-        return wyhash(value, strlen(value), seed, _wyp);
-    }
-
-    static uint64_t hashBytes(void* data, size_t lenght, size_t seed = 0)
-    {
-        return wyhash(data, lenght, seed, _wyp);
-    }
-
-    static const uint64_t ITERATOR_END = UINT64_MAX;
 
     struct FindInfo 
     {
@@ -653,6 +655,7 @@ namespace Air
         Allocator* allocator = nullptr;
         KeyValue defaultKeyValue = { (K) - 1, 0 };
     };
-}
+
+}//AIR
 
 #endif // !HASH_MAP_HDR
