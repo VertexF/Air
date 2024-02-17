@@ -61,7 +61,7 @@ namespace
 
     uint64_t lzcntSoft(uint64_t n)
     {
-        //Note(macro): __lzcnt intrisics require at least aswell.
+        //Note(macro): __lzcnt intrisics require at least as well.
 #if defined(_MSC_VER)
         unsigned long index = 0;
         _BitScanReverse64(&index, n);
