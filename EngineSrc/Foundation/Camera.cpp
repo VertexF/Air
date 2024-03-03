@@ -133,7 +133,7 @@ namespace Air
 
     void Camera::getProjectionOrtho2D(mat4s& outMatrix) 
     {
-        glm_ortho_lh_zo(0, viewportWidth * zoom, 0, viewportHeight * zoom, -1.f, 1.f, outMatrix);
+        outMatrix = glms_ortho(0, viewportWidth * zoom, 0, viewportHeight * zoom, -1.f, 1.f);
     }
 
     void Camera::yawPitchFromDirection(const vec3s& direction, float& yaw, float& pitch)

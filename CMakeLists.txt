@@ -72,8 +72,8 @@ set(AIR_FOUNDATION_SOURCE EngineSrc/Foundation/Array.h
                           EngineSrc/Foundation/DataStructures.h
                           EngineSrc/Foundation/File.cpp
                           EngineSrc/Foundation/File.h
-                          # EngineSrc/Foundation/Gltf.cpp
-                          # EngineSrc/Foundation/Gltf.h
+                          EngineSrc/Foundation/Gltf.cpp
+                          EngineSrc/Foundation/Gltf.h
                           EngineSrc/Foundation/HashMap.h
                           EngineSrc/Foundation/HashMap.cpp
                           EngineSrc/Foundation/Log.cpp
