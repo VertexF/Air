@@ -129,8 +129,8 @@ set(AIR_APPLICATION_SOURCE EngineSrc/Application/Application.cpp
                            # EngineSrc/Application/Input.h
                            # EngineSrc/Application/Keys.cpp
                            # EngineSrc/Application/Keys.h
-                           # EngineSrc/Application/Window.cpp
-                           # EngineSrc/Application/Window.h
+                           EngineSrc/Application/Window.cpp
+                           EngineSrc/Application/Window.h
 )
 
 add_library(AirApplication STATIC ${AIR_APPLICATION_SOURCE})
