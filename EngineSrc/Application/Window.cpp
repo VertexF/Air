@@ -81,6 +81,11 @@ namespace Air
             case SDL_QUIT:
             {
                 requestedExit = true;
+                for (uint32_t i = 0; i < OSMessagesCallbacks.size; ++i)
+                {
+                    OSMessagesCallback callback = OSMessagesCallbacks[i];
+                    callback(&events, OSMessagesCallbacksData[i]);
+                }
                 break;
             }
 
@@ -143,17 +148,48 @@ namespace Air
 
     void Window::setFullscreen(bool value) 
     {
+        if (value) 
+        {
+            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        }
+        else 
+        {
+            SDL_SetWindowFullscreen(window, 0);
+        }
     }
 
-    void Window::registerOSMessagesCallback(OsMessagesCallback callback, void* userData) 
+    void Window::registerOSMessagesCallback(OSMessagesCallback callback, void* userData) 
     {
+        OSMessagesCallbacks.push(callback);
+        OSMessagesCallbacksData.push(userData);
     }
 
-    void Window::unredisterOSMessagesCallback(OsMessagesCallback callback) 
+    void Window::unredisterOSMessagesCallback(OSMessagesCallback callback) 
     {
+        AIR_ASSERTM(OSMessagesCallbacks.size < 8, "This array is too big for a linear search. Consider using something different.");
+
+        for (uint32_t i = 0; i < OSMessagesCallbacks.size; ++i)
+        {
+            if (OSMessagesCallbacks[i] == callback)
+            {
+                OSMessagesCallbacks.deleteSwap(i);
+                OSMessagesCallbacksData.deleteSwap(i);
+            }
+        }
     }
 
     void Window::centerMouse(bool dragging) 
     {
+        if (dragging) 
+        {
+            SDL_WarpMouseInWindow(window, roundU32(width / 2.f), roundU32(height / 2.f));
+            SDL_SetWindowGrab(window, SDL_TRUE);
+            SDL_SetRelativeMouseMode(SDL_TRUE);
+        }
+        else 
+        {
+            SDL_SetWindowGrab(window, SDL_FALSE);
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+        }
     }
 }
