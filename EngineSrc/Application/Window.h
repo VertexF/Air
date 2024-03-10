@@ -17,7 +17,7 @@ namespace Air
         Allocator* allocator;
     };
 
-    typedef void(*OsMessagesCallback)(void *osEvent, void* userData);
+    typedef void(*OSMessagesCallback)(void *osEvent, void* userData);
 
     struct Window : public Service 
     {
@@ -28,12 +28,12 @@ namespace Air
 
         void setFullscreen(bool value);
 
-        void registerOSMessagesCallback(OsMessagesCallback callback, void* userData);
-        void unredisterOSMessagesCallback(OsMessagesCallback callback);
+        void registerOSMessagesCallback(OSMessagesCallback callback, void* userData);
+        void unredisterOSMessagesCallback(OSMessagesCallback callback);
 
         void centerMouse(bool dragging);
 
-        Array<OsMessagesCallback> OSMessagesCallbacks;
+        Array<OSMessagesCallback> OSMessagesCallbacks;
         Array<void*> OSMessagesCallbacksData;
 
         void* platformHandle = nullptr;

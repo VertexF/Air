@@ -127,8 +127,8 @@ set(AIR_APPLICATION_SOURCE EngineSrc/Application/Application.cpp
                            # EngineSrc/Application/GameApplication.h
                            # EngineSrc/Application/Input.cpp
                            # EngineSrc/Application/Input.h
-                           # EngineSrc/Application/Keys.cpp
-                           # EngineSrc/Application/Keys.h
+                           EngineSrc/Application/Keys.cpp
+                           EngineSrc/Application/Keys.h
                            EngineSrc/Application/Window.cpp
                            EngineSrc/Application/Window.h
 )
